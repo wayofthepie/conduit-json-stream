@@ -1,5 +1,5 @@
 # Hacking
-Some hacking about with the conduit and json-stream library.
+Some hacking about with the conduit and json-stream libraries.
 
 ## Working Example
 Some notes so I remember... Given the following json in a file **simple.json**:
