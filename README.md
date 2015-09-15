@@ -6,7 +6,7 @@ Some notes so I remember... Given the following json in a file **simple.json**:
 ```json
 {
     "a": {
-        "b" : "c"
+        "b" : "c",
         "d" : {
             "e": "f"
         }
