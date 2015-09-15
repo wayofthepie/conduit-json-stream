@@ -13,7 +13,7 @@ Some notes so I remember... Given the following json in a file **simple.json**:
     }
 }
 ```
-I want to extract the value of **a** and **e**:
+I want to extract the value of **b** and **e**:
 ```haskell
 -- | The parser would be as follows
 p :: Parser (T.Text, T.Text)
