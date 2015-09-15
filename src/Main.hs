@@ -4,27 +4,27 @@
 
 module Main where
 
-import Control.Monad.Trans.Resource
 import Data.Aeson
-import Data.Conduit
 import qualified Data.ByteString.Char8 as BC
+import Data.Conduit
+import qualified Data.Conduit.Binary as CB
+import qualified Data.Conduit.List as CL
 import Data.JsonStream.Parser
 import qualified Data.Text as T
+import Control.Monad.Trans.Resource
 
 import Debug.Trace
 
 main :: IO ()
 main = putStrLn "hello world"
 
-
-
-jsonParse :: Conduit BC.ByteString (ResourceT IO) (T.Text, Value)
-jsonParse = doParse parseOutput
+jsonParse :: Show a => Parser a -> Conduit BC.ByteString (ResourceT IO) a
+jsonParse p = doParse $ parseOutput p
   where
-    parseOutput :: ParseOutput (T.Text, Value)
-    parseOutput = runParser (objectItems value)
+    parseOutput :: Show a => Parser a -> ParseOutput a
+    parseOutput p = runParser p
 
-    doParse :: ParseOutput (T.Text, Value) -> Conduit BC.ByteString (ResourceT IO) (T.Text, Value)
+    doParse :: Show a => ParseOutput a -> Conduit BC.ByteString (ResourceT IO) a
     doParse out = case out of
         ParseYield value newOutput  -> do
             yield $ value
@@ -36,17 +36,11 @@ jsonParse = doParse parseOutput
         ParseFailed err -> error err
 
 
-jsonDump :: Sink (T.Text, Value) (ResourceT IO) [(T.Text, Value)]
-jsonDump = go []
-  where
-    go acc = do
-        val <- await
-        case val of
-            Just v -> trace (show v) $ go (v:acc)
-            Nothing -> return acc
-
-
-{-
-jsonAnalysis :: (a -> b) -> Conduit a (ResourceT IO) b
-jsonAnalysis
--}
+-- | Function to test the above.
+jsonC :: String -> IO [(T.Text, Value)]
+jsonC fp = runResourceT $
+    let p = objectItems value :: Parser (T.Text, Value)
+    in CB.sourceFile fp
+        $= CB.lines
+        $$ jsonParse p
+        $= CL.consume
